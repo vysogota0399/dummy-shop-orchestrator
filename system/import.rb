@@ -1,3 +1,3 @@
-require 'system/orchestrator_container'
+# frozen_string_literal: true
 
-Import = OrchestratorContainer.injector
+Import = Orchestrator.injector

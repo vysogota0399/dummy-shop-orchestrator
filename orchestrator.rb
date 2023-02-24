@@ -1,3 +1,5 @@
-require 'system/import'
+# frozen_string_literal: true
 
-OrchestratorContainer.finalize!
+require 'system/boot'
+
+Orchestrator.finalize!
