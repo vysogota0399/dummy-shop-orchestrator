@@ -1,4 +1,0 @@
-# Logfile created on 2023-02-24 11:12:23 +0000 by logger.rb/v1.5.0
-I, [2023-02-24T11:20:23.958739 #1]  INFO -- : Processing request [GET] /api/v1 from 172.20.0.1
-I, [2023-02-24T11:20:23.959356 #1]  INFO -- : Request params: {}
-I, [2023-02-24T11:20:23.966319 #1]  INFO -- : Request finished with status: 200, response body: ["{\"version\":\"0.0.1\"}"]
