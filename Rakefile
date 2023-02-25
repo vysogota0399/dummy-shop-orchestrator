@@ -12,7 +12,7 @@ class Seeder
   def load_seed
     raise "Seed file '#{@seed}' does not exist" unless File.file? @seed
 
-    require @seed_file
+    load @seed_file
   end
 end
 
@@ -31,4 +31,4 @@ DatabaseTasks.root = root
 
 task :environment
 
-require 'active_record/railties/databases.rake'
+load 'active_record/railties/databases.rake'

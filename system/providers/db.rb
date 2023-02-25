@@ -8,6 +8,7 @@ Orchestrator.register_provider(:db) do
     parsed_data = ERB.new(file_data).result
 
     ActiveRecord::Base.configurations = YAML.safe_load(parsed_data, aliases: true)
+    ActiveRecord::Base.logger = Logger.new("#{Orchestrator.config.log_dir}/active_record.log")
   end
 
   start do
