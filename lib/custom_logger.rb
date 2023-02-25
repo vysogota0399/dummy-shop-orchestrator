@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class CustomLogger
-  attr_reader :logger
-
   def initialize(path)
     dir = File.dirname(path)
     @logger = Dry.Logger(path, template: '[%<time>s][%<severity>s] %<message>s')
@@ -19,6 +17,10 @@ class CustomLogger
 
   def warn(message, **args)
     @logger.warn log_message(message), **args
+  end
+
+  def error(message, **args)
+    @logger.error log_message(message), **args
   end
 
   def level=(_severity); end

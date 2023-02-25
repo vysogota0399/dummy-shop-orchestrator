@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
 require 'sinatra/custom_logger'
+require 'sinatra/namespace'
+require 'sinatra/json'
 
 class Api < Sinatra::Application
   helpers Sinatra::CustomLogger
 
   set :logger, Orchestrator.logger
-
   namespace '/api/v1' do
     before do
       Thread.current[:request_id] = SecureRandom.hex(16)

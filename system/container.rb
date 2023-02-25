@@ -14,7 +14,6 @@ class Orchestrator < Dry::System::Container
     config.name = :orchestrator
     config.root = '.'
 
-    config.component_dirs.add 'app'
     config.component_dirs.add 'lib'
   end
 end
