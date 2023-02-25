@@ -10,7 +10,7 @@ class Api < Sinatra::Application
   namespace '/api/v1' do
     before do
       Thread.current[:request_id] = SecureRandom.hex(16)
-      logger.info("Processing request [#{request.request_method}] #{request.path} from #{request.ip}", http: true)
+      logger.info("Processing request #{request.request_method} #{request.path} from #{request.ip}", http: true)
       logger.info("Request params: #{params}", http: true)
     end
 
