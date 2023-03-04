@@ -1,10 +1,16 @@
 # frozen_string_literal: true
 
 class CustomLogger
+  ERROR = 'error'
+  DEBUG = 'debug'
+  INFO  = 'info'
+
   def initialize(path)
     dir = File.dirname(path)
-    @logger = Dry.Logger(path, template: '[%<time>s][%<severity>s] %<message>s')
+    level = Orchestrator.config.log_level
+    @logger = Dry.Logger(path, template: '[%<time>s][%<severity>s] %<message>s', level: level)
                  .add_backend(stream: "#{dir}/http.log", log_if: ->(entry) { entry.key?(:http) })
+                 .add_backend(stream: "#{dir}/orchestrator.log", log_if: ->(entry) { entry.key?(:orch) })
   end
 
   def info(message, **args)
@@ -19,8 +25,8 @@ class CustomLogger
     @logger.warn log_message(message), **args
   end
 
-  def error(message, **args)
-    @logger.error log_message(message), **args
+  def fatal(message, **args)
+    @logger.fatal log_message(message), **args
   end
 
   def level=(_severity); end

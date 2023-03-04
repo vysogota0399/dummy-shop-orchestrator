@@ -14,9 +14,12 @@ gem 'sinatra-contrib', '~> 3.0', '>= 3.0.5', require: false
 
 gem 'pg', '~> 1.4', '>= 1.4.5' 
 gem 'sinatra-activerecord', '~> 2.0', '>= 2.0.26'
+gem 'faker', '~> 3.1', '>= 3.1.1'
 
 gem 'puma', '~> 6.0'
 gem 'irb', '~> 1.6'
 gem 'rake'
 gem 'byebug'
 gem 'erb', '~> 4.0', '>= 4.0.2'
+gem 'pagy', '~> 5.10'
+gem 'activesupport', '~> 7.0', '>= 7.0.4.2'

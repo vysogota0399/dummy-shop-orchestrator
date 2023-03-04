@@ -9,11 +9,15 @@ class Orchestrator < Dry::System::Container
   # logger
   setting :log_dir, default: 'log'
   setting :logger_class, default: ::CustomLogger
+  setting :log_level, default: ENV.fetch('log_level', 'debug')
 
   configure do |config|
     config.name = :orchestrator
     config.root = '.'
 
     config.component_dirs.add 'lib'
+    config.component_dirs.add 'app' do |dir|
+      dir.namespaces.add 'finders', key: nil, const: nil
+    end
   end
 end

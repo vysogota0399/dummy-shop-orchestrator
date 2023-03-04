@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_02_25_144225) do
+ActiveRecord::Schema[7.0].define(version: 2023_02_25_155332) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -21,6 +21,31 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_25_144225) do
     t.integer "remainder"
     t.string "title"
     t.string "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "order_items", force: :cascade do |t|
+    t.bigint "order_id"
+    t.bigint "item_id"
+    t.integer "cost_cops"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["item_id"], name: "index_order_items_on_item_id"
+    t.index ["order_id"], name: "index_order_items_on_order_id"
+  end
+
+  create_table "orders", force: :cascade do |t|
+    t.bigint "performer_id"
+    t.bigint "customer_id"
+    t.integer "cost_cops"
+    t.string "customer_email"
+    t.string "address"
+    t.string "front_door"
+    t.string "floor"
+    t.string "intercom"
+    t.boolean "no_hand"
+    t.integer "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
