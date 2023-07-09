@@ -4,7 +4,6 @@ require 'sinatra/custom_logger'
 require 'sinatra/namespace'
 require 'sinatra/json'
 
-# rubocop:disable Metrics/BlockLength
 class Api < Sinatra::Application
   include Pagy::Backend
   include Import['item_finder']
@@ -63,8 +62,8 @@ class Api < Sinatra::Application
 
     namespace '/orders' do
       post do
+        
       end
     end
   end
 end
-# rubocop:enable Metrics/BlockLength

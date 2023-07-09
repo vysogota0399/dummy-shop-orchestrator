@@ -7,6 +7,10 @@ class Item < ApplicationRecord
   has_many :order_items
   has_many :orders, through: :order_items
 
+  belongs_to :provider
+
+  has_many :item_reviews, dependent: :destroy
+
   def cost_rub
     cost_cops.to_f / 100.round(2)
   end

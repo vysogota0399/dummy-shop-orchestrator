@@ -6,3 +6,4 @@ require_relative 'import'
 Orchestrator.finalize!
 
 require 'app/models'
+require 'app/processor'

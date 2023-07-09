@@ -79,6 +79,13 @@ GEM
       rack-protection (= 3.0.5)
       sinatra (= 3.0.5)
       tilt (~> 2.0)
+    state_machines (0.5.0)
+    state_machines-activemodel (0.8.0)
+      activemodel (>= 5.1)
+      state_machines (>= 0.5.0)
+    state_machines-activerecord (0.8.0)
+      activerecord (>= 5.1)
+      state_machines-activemodel (>= 0.8.0)
     tilt (2.0.11)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
@@ -106,6 +113,7 @@ DEPENDENCIES
   sinatra (~> 3.0, >= 3.0.4)
   sinatra-activerecord (~> 2.0, >= 2.0.26)
   sinatra-contrib (~> 3.0, >= 3.0.5)
+  state_machines-activerecord
 
 BUNDLED WITH
    2.3.26

@@ -10,9 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_02_25_155332) do
+ActiveRecord::Schema[7.0].define(version: 2023_07_09_125314) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "item_reviews", force: :cascade do |t|
+    t.bigint "item_id"
+    t.index ["item_id"], name: "index_item_reviews_on_item_id"
+  end
 
   create_table "items", force: :cascade do |t|
     t.integer "kind"
@@ -23,6 +28,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_25_155332) do
     t.string "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "provider_id"
+    t.index ["provider_id"], name: "index_items_on_provider_id"
   end
 
   create_table "order_items", force: :cascade do |t|
@@ -36,8 +43,9 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_25_155332) do
   end
 
   create_table "orders", force: :cascade do |t|
-    t.bigint "performer_id"
     t.bigint "customer_id"
+    t.bigint "assembler_id"
+    t.bigint "courier_id"
     t.integer "cost_cops"
     t.string "customer_email"
     t.string "address"
@@ -45,9 +53,20 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_25_155332) do
     t.string "floor"
     t.string "intercom"
     t.boolean "no_hand"
-    t.integer "status"
+    t.string "state"
+    t.datetime "delivered_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
+  create_table "providers", force: :cascade do |t|
+    t.string "name"
+    t.string "email"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_providers_on_email", unique: true
+  end
+
+  add_foreign_key "item_reviews", "items"
+  add_foreign_key "items", "providers"
 end

@@ -14,10 +14,9 @@ class Orchestrator < Dry::System::Container
   configure do |config|
     config.name = :orchestrator
     config.root = '.'
-
-    config.component_dirs.add 'lib'
     config.component_dirs.add 'app' do |dir|
       dir.namespaces.add 'finders', key: nil, const: nil
+      # dir.namespaces.add 'operations', key: nil, const: nil
     end
   end
 end
