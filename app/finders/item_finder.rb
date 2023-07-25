@@ -10,9 +10,9 @@ class ItemFinder
   def call(filter)
     @filter = filter
     @kind = filter[:kind]
-    @sort_by = filter[:sort_by] || 'created_at'
-    @sort_direction = filter[:sort_direction] || 'desc'
-    @id = filter[:id] || []
+    @sort_by = filter.fetch(:sort_by, 'created_at')
+    @sort_direction = filter.fetch(:sort_direction, 'desc')
+    @id = filter.fetch(:id, [])
     build_query
   end
 

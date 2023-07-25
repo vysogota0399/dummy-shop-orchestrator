@@ -1,21 +1,15 @@
 # frozen_string_literal: true
 
 class Order < ApplicationRecord
-  attr_accessor :signal_params
+  include Concerns::Base
+  # attr_accessor :signal_params
 
   has_many :order_items
   has_many :items, through: :order_items
 
-  state_machine initial: :waiting do
-    before_transition any: :waiting do |order, _transition|
-      # TODO: OrderTransitions::Initialize(order)
-    end
-
+  state_machine do
     event :start_assembly do
-      transition waiting: :assembling
-    end
-    before_transition waiting: :assembling do |order, _transition|
-      # TODO: OrderTransitions::StartAssembly(order)
+      transition new: :assembling
     end
 
     event :finish_assembly do
@@ -35,13 +29,8 @@ class Order < ApplicationRecord
     event :finish_delivery do
       transition delivering: :delivered
     end
-    before_transition delivering: :delivered do |order, _tranxqsition|
+    before_transition delivering: :delivered do |order, _transition|
       # TODO: OrderTransitions::FinishDelivery(order)
-    end
-
-    around_transition do |order, transition, block|
-      order.signal_params = (transition.args.first || {}).with_indifferent_access
-      block.call
     end
   end
 end
