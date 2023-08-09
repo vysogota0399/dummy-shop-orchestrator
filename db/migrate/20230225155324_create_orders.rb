@@ -14,6 +14,7 @@ class CreateOrders < ActiveRecord::Migration[7.0]
       t.boolean   :no_hand
 
       t.string    :state
+      t.json      :error
 
       t.datetime  :delivered_at
       t.timestamps
