@@ -1,0 +1,1 @@
+require 'app/serializers/order_serializer'

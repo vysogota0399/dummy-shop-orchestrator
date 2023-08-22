@@ -1,34 +1,56 @@
 version: "3.9"
 
+x-default_service: &default_service
+  build:
+    context: .
+  volumes:
+    - .:/usr/src/app
+  env_file:
+    - .env
+  tty: true
+  stdin_open: true
+
 services:
+  http:
+    <<: *default_service
+    container_name: shop-http-orch
+    command: bundle exec rackup --host=0.0.0.0
+    ports:
+      - 3000:9292
+    depends_on:
+      message_broker:
+        condition: service_healthy
+      postgres:
+        condition: service_started
 
   postgres:
     image: postgres:14.2
-    container_name: shop-orch-postgres
+    container_name: shop-postgres
     environment:
       POSTGRES_USER: orchestrator
       POSTGRES_PASSWORD: secret
     volumes:
       - postgres:/var/lib/postgresql/data
-
-  app:
-    build:
-      context: .
-    container_name: shop-orch
+  
+  message_broker:
+    image: rabbitmq:3.12.2-management
+    platform: linux/arm64
+    container_name: shop-message_broker
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    ports: 
+      - 5672:5672
+      - 15672:15672
     volumes:
-      - .:/usr/src/app
-    ports:
-      - 3000:9292
-    links:
-      - postgres
-    env_file:
-      - .env
-    tty: true
-    stdin_open: true
-    command: bundle exec rackup --host=0.0.0.0
+      - 'message_broker:/data'
+
 
 volumes:
   postgres:
+  message_broker:
 
 networks:
   default:

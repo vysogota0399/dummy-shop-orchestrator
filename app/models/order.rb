@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 class Order < ApplicationRecord
-  include Concerns::Base
-  # attr_accessor :signal_params
+  include Concerns::Core
+  
+  attr_reader :order_update_publisher
 
   has_many :order_items
   has_many :items, through: :order_items

@@ -1,9 +1,17 @@
 module Concerns
-  module Base
+  module Core
     attr_accessor :signal_params
 
     def self.included(base)
+      include InstanceMethods
+
+      attr_accessor :order_update_publisher
+
       base.class_eval do
+        after_initialize do |object|
+          object.order_update_publisher = Orchestrator['order_update_publisher']
+        end
+        
         state_machine initial: :new do
           around_transition do |order, transition, block|
             order.signal_params = (transition.args.first || {}).with_indifferent_access
@@ -20,8 +28,15 @@ module Concerns
               backtrace: error.backtrace.first(3),
             })
           end
+
+          after_transition any => any do |order, _transition|
+            serialized_order = OrderSerializer.new(order).serializable_hash.to_json
+            order.order_update_publisher.call(serialized_order)
+          end
         end
       end
     end
+
+    module InstanceMethods; end
   end
 end

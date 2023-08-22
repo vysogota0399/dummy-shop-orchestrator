@@ -6,7 +6,7 @@ require 'sinatra/json'
 
 class Api < Sinatra::Application
   include Pagy::Backend
-  include Import['item_finder']
+  include Import['orders_filter', 'items_filter']
 
   helpers Sinatra::CustomLogger
   helpers do
@@ -38,9 +38,9 @@ class Api < Sinatra::Application
         request.body.rewind
         @json_params = JSON.parse(request.body.read).with_indifferent_access
         logger.info("Request params: #{@json_params}", http: true)
+      else
+        logger.info("Request params: #{params}", http: true)
       end
-
-      logger.info("Request params: #{params}", http: true)
     end
 
     after do
@@ -52,11 +52,8 @@ class Api < Sinatra::Application
     end
 
     namespace '/items' do
-      get do
-        with_meta = params.delete(:with_meta)
-        response = add_pagination(item_finder.call(params))
-        response[:meta] = item_finder.meta if with_meta.presence == 'true'
-        json response
+      post 'filter 'do
+        json items_filter.call(@json_params)
       end
     end
 

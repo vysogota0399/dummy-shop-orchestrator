@@ -1,0 +1,13 @@
+default: &default
+  host: <%= ENV.fetch('BROKER_HOST', 'message_broker') %>
+  port: <%= ENV.fetch('BROKER_PORT', 5672) %>
+  username: <%= ENV.fetch('BROKER_USERNAME', 'guest') %>
+  password: <%= ENV.fetch('BROKER_PASSWORD', 'guest') %>
+
+development:
+  <<: *default
+  database: <%= ENV.fetch('BROKER_LOG_LEVEL', :debug) %>
+
+test:
+  <<: *default
+  database: <%= ENV.fetch('BROKER_LOG_LEVEL', :debug) %>
