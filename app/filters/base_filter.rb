@@ -9,7 +9,7 @@ class BaseFilter
     apply_find
     apply_filter
     apply_order
-    scope
+    scope.all
   end
 
   private

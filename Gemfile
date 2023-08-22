@@ -11,9 +11,9 @@ gem 'dry-logger', '~> 1.0', '>= 1.0.3'
 # sinatra
 gem 'sinatra', '~> 3.0', '>= 3.0.4'
 gem 'sinatra-contrib', '~> 3.0', '>= 3.0.5', require: false
+gem 'sinatra-activerecord', '~> 2.0', '>= 2.0.26'
 
 gem 'pg', '~> 1.4', '>= 1.4.5' 
-gem 'sinatra-activerecord', '~> 2.0', '>= 2.0.26'
 gem 'state_machines-activerecord'
 gem 'faker', '~> 3.1', '>= 3.1.1'
 

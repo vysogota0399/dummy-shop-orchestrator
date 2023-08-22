@@ -3,7 +3,7 @@
 class OrderSerializer
   include JSONAPI::Serializer
 
-  attributes :state, :assembler_id, :courier_id, :cost_cops
+  attributes :id, :state, :assembler_id, :courier_id, :cost_cops
 
   attribute :client do |object|
     {

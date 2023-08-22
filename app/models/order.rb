@@ -9,8 +9,15 @@ class Order < ApplicationRecord
   has_many :items, through: :order_items
 
   state_machine do
+    event :prepare do
+      transition new: :waiting_for_the_assembly
+    end
+    before_transition new: :waiting_for_the_assembly do |order, _transition|
+      order.item_ids = order.signal_params[:item_ids]
+    end
+
     event :start_assembly do
-      transition new: :assembling
+      transition waiting_for_the_assembly: :assembling
     end
     after_transition new: :assembling do |order, _transition|
 

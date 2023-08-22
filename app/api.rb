@@ -10,12 +10,19 @@ class Api < Sinatra::Application
 
   helpers Sinatra::CustomLogger
   helpers do
-    def add_pagination(query)
-      pagination_meta, items = pagy(query)
+    def with_pagination(scope)
+      pagination_meta, scope = pagy(scope)
       {
-        pagination: pagination_meta.vars.slice(:count, :page),
-        items: items
+        meta: pagination_meta.vars.slice(:count, :page, :items),
+        scope: scope,
       }
+    end
+
+    def render_json(scope)
+      paginated = with_pagination(scope)
+      serialized_scope = with_serializer(paginated.delete(:scope))
+      
+      json serialized_scope.merge(paginated)
     end
   end
 
@@ -25,7 +32,13 @@ class Api < Sinatra::Application
   namespace '/api/v1' do
     error 500 do
       response = { error: 'internal server error' }
-      logger.fatal env['sinatra.error'].message, http: true
+      error_message = "#{env['sinatra.error'].message}\n#{env['sinatra.error'].backtrace.take(5).join("\n")}"
+      logger.fatal error_message, http: true
+      json response
+    end
+    
+    error 404 do
+      response = { error: 'not found' }
       json response
     end
 
@@ -36,11 +49,11 @@ class Api < Sinatra::Application
       case request.request_method
       when 'POST', 'PUT'
         request.body.rewind
-        @json_params = JSON.parse(request.body.read).with_indifferent_access
-        logger.info("Request params: #{@json_params}", http: true)
-      else
-        logger.info("Request params: #{params}", http: true)
+        body = JSON.parse(request.body.read.presence || '{}').with_indifferent_access
+        @params = body.merge(params.presence || {})
       end
+        
+      logger.info("Request params: #{params}", http: true)
     end
 
     after do
@@ -52,14 +65,21 @@ class Api < Sinatra::Application
     end
 
     namespace '/items' do
-      post 'filter 'do
-        json items_filter.call(@json_params)
+      helpers do
+        def with_serializer(scope)
+          ItemSerializer.new(scope).serializable_hash
+        end
+      end
+
+      post '/filter' do
+        render_json items_filter.call(params)
       end
     end
 
     namespace '/orders' do
       post do
-        
+        processor = Processor.new(params.delete(:order))
+        processor.send_signal(:prepare, params)
       end
     end
   end
