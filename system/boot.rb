@@ -8,3 +8,4 @@ Orchestrator.finalize!
 require 'app/models'
 require 'app/serializers'
 require 'app/processor'
+require 'app/validations'

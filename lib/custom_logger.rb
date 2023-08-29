@@ -8,7 +8,7 @@ class CustomLogger
   def initialize(path)
     dir = File.dirname(path)
     level = Orchestrator.config.log_level
-    @logger = Dry.Logger(path, template: '[%<time>s][%<severity>s] %<message>s', level: level)
+    @logger = Dry.Logger(path, template: '[%<time>s][%<severity>s]%<message>s', level: level)
                  .add_backend(stream: "#{dir}/http.log", log_if: ->(entry) { entry.key?(:http) })
                  .add_backend(stream: "#{dir}/orchestrator.log", log_if: ->(entry) { entry.key?(:orch) })
   end
@@ -34,6 +34,6 @@ class CustomLogger
   private
 
   def log_message(message)
-    "[#{Thread.current[:request_id]}] #{message}"
+    Thread.current[:request_id].present? ? "[#{Thread.current[:request_id]}] #{message}" : message
   end
 end

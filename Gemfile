@@ -7,6 +7,7 @@ gem 'dry-system', '~> 1.0', '>= 1.0.1'
 gem 'dry-monitor', '~> 1.0', '>= 1.0.1'
 gem 'dry-configurable', '~> 1.0', '>= 1.0.1'
 gem 'dry-logger', '~> 1.0', '>= 1.0.3'
+gem 'dry-validation', '~> 1.10'
 
 # sinatra
 gem 'sinatra', '~> 3.0', '>= 3.0.4'

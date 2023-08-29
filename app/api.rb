@@ -18,7 +18,7 @@ class Api < Sinatra::Application
       }
     end
 
-    def render_json(scope)
+    def render_json_collection(scope)
       paginated = with_pagination(scope)
       serialized_scope = with_serializer(paginated.delete(:scope))
       
@@ -42,9 +42,15 @@ class Api < Sinatra::Application
       json response
     end
 
+    error 400 do
+      error = env['sinatra.error'].message
+      response = { error: JSON.parse(error) }
+      json response
+    end
+
     before do
       Thread.current[:request_id] = SecureRandom.hex(16)
-      logger.info("Processing request #{request.request_method} #{request.path} from #{request.ip}", http: true)
+      logger.info("Request #{request.request_method} #{request.path} from #{request.ip}", http: true)
 
       case request.request_method
       when 'POST', 'PUT'
@@ -57,7 +63,7 @@ class Api < Sinatra::Application
     end
 
     after do
-      logger.info("Request finished with status: #{response.status}, response body: #{response.body}", http: true)
+      logger.info("Response #{response.status} #{response.body}", http: true)
     end
 
     get do
@@ -72,14 +78,30 @@ class Api < Sinatra::Application
       end
 
       post '/filter' do
-        render_json items_filter.call(params)
+        render_json_collection items_filter.call(params)
       end
     end
 
     namespace '/orders' do
+      helpers do
+        def with_serializer(scope)
+          OrderSerializer.new(scope).serializable_hash
+        end
+      end
       post do
         processor = Processor.new(params.delete(:order))
+        processor.send_signal(:validate!)
         processor.send_signal(:prepare, params)
+        json with_serializer(processor.order)
+      end
+
+      post '/validate' do
+        processor = Processor.new(params.delete(:order))
+        processor.send_signal(:validate!)
+      end
+
+      get '/:id' do
+        json with_serializer(Processor.new(params[:id]).order)
       end
     end
   end

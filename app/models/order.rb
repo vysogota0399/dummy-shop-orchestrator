@@ -5,6 +5,8 @@ class Order < ApplicationRecord
   
   attr_reader :order_update_publisher
 
+  validates_presence_of :customer_id, :customer_email, :address, :front_door, :floor, :intercom
+
   has_many :order_items
   has_many :items, through: :order_items
 

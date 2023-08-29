@@ -5,16 +5,22 @@ class Processor
 
   def initialize(args)
     case args
-    when Integer
+    when Integer, String
       @order = Order.find(args)
     when Hash
       @order = Order.new(args)
+    else
+      raise Sinatra::BadRequest, { order: { attributes: :blank} }.to_json
     end
   end
 
   def send_signal(signal, params = {})
     Orchestrator.logger.info("Processing signal #{signal} for order##{order.id} with params: #{params}")
     order.send(signal, params)
+  rescue ActiveRecord::RecordInvalid
+    raise Sinatra::BadRequest, { order: order.errors }.to_json
+  rescue ActiveRecord => error
+    raise Sinatra::BadRequest, { order: error.message }.to_json
   rescue StandardError => error
     log_error(error)
     order.terminate(error: error)
