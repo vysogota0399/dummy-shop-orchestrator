@@ -10,8 +10,10 @@ class Processor
     when Hash
       @order = Order.new(args)
     else
-      raise Sinatra::BadRequest, { order: { attributes: :blank} }.to_json
+      raise Sinatra::BadRequest, { order: { attributes: :blank } }.to_json
     end
+  rescue ActiveRecord::RecordNotFound => e
+    raise Sinatra::NotFound
   end
 
   def send_signal(signal, params = {})
@@ -19,8 +21,6 @@ class Processor
     order.send(signal, params)
   rescue ActiveRecord::RecordInvalid
     raise Sinatra::BadRequest, { order: order.errors }.to_json
-  rescue ActiveRecord => error
-    raise Sinatra::BadRequest, { order: error.message }.to_json
   rescue StandardError => error
     log_error(error)
     order.terminate(error: error)

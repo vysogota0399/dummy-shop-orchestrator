@@ -38,7 +38,7 @@ class Api < Sinatra::Application
     end
     
     error 404 do
-      response = { error: 'not found' }
+      response = { error: 'not_found' }
       json response
     end
 
@@ -51,14 +51,11 @@ class Api < Sinatra::Application
     before do
       Thread.current[:request_id] = SecureRandom.hex(16)
       logger.info("Request #{request.request_method} #{request.path} from #{request.ip}", http: true)
-
-      case request.request_method
-      when 'POST', 'PUT'
+      if request.content_type == "application/json" && %w[POST PUT].include?(request.request_method)
         request.body.rewind
         body = JSON.parse(request.body.read.presence || '{}').with_indifferent_access
         @params = body.merge(params.presence || {})
       end
-        
       logger.info("Request params: #{params}", http: true)
     end
 
@@ -72,8 +69,8 @@ class Api < Sinatra::Application
 
     namespace '/items' do
       helpers do
-        def with_serializer(scope)
-          ItemSerializer.new(scope).serializable_hash
+        def with_serializer(scope, opts = {})
+          ItemSerializer.new(scope, params: opts).serializable_hash
         end
       end
 
@@ -84,8 +81,8 @@ class Api < Sinatra::Application
 
     namespace '/orders' do
       helpers do
-        def with_serializer(scope)
-          OrderSerializer.new(scope).serializable_hash
+        def with_serializer(scope, opts = {})
+          OrderSerializer.new(scope, params: opts).serializable_hash
         end
       end
       post do
@@ -101,7 +98,7 @@ class Api < Sinatra::Application
       end
 
       get '/:id' do
-        json with_serializer(Processor.new(params[:id]).order)
+        json with_serializer(Processor.new(params[:id]).order, with_items: true)
       end
     end
   end

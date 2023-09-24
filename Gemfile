@@ -27,3 +27,10 @@ gem 'pagy', '~> 5.10'
 gem 'activesupport', '~> 7.0', '>= 7.0.4.2'
 gem 'bunny', '~> 2.22'
 gem 'jsonapi-serializer', '~> 2.2'
+
+group :test do
+  gem 'rspec', '~> 3.12'
+  gem 'rack-test', '~> 2.1'
+  gem 'database_cleaner-active_record', '~> 2.1'
+  gem 'factory_bot', '~> 6.2', '>= 6.2.1'
+end

@@ -6,6 +6,8 @@ class OrderSerializer
   attributes :id, :state, :assembler_id, :courier_id, :cost_cops
   attribute :error, if: ->(order) { order.damaged? }
 
+  has_many :items, if: Proc.new { |order, params| params && params[:with_items] }
+
   attribute :client do |object|
     {
       customer_id: object.customer_id,
