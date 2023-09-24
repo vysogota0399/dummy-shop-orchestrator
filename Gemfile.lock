@@ -151,6 +151,7 @@ GEM
 
 PLATFORMS
   aarch64-linux-musl
+  arm64-darwin-22
 
 DEPENDENCIES
   activesupport (~> 7.0, >= 7.0.4.2)

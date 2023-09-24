@@ -12,7 +12,7 @@ class Processor
     else
       raise Sinatra::BadRequest, { order: { attributes: :blank } }.to_json
     end
-  rescue ActiveRecord::RecordNotFound => e
+  rescue ActiveRecord::RecordNotFound
     raise Sinatra::NotFound
   end
 
@@ -21,9 +21,9 @@ class Processor
     order.send(signal, params)
   rescue ActiveRecord::RecordInvalid
     raise Sinatra::BadRequest, { order: order.errors }.to_json
-  rescue StandardError => error
-    log_error(error)
-    order.terminate(error: error)
+  rescue StandardError => e
+    log_error(e)
+    order.terminate(error: e)
   end
 
   private

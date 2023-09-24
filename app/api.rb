@@ -14,14 +14,14 @@ class Api < Sinatra::Application
       pagination_meta, scope = pagy(scope)
       {
         meta: pagination_meta.vars.slice(:count, :page, :items),
-        scope: scope,
+        scope:
       }
     end
 
     def render_json_collection(scope)
       paginated = with_pagination(scope)
       serialized_scope = with_serializer(paginated.delete(:scope))
-      
+
       json serialized_scope.merge(paginated)
     end
   end
@@ -36,7 +36,7 @@ class Api < Sinatra::Application
       logger.fatal error_message, http: true
       json response
     end
-    
+
     error 404 do
       response = { error: 'not_found' }
       json response
@@ -51,7 +51,7 @@ class Api < Sinatra::Application
     before do
       Thread.current[:request_id] = SecureRandom.hex(16)
       logger.info("Request #{request.request_method} #{request.path} from #{request.ip}", http: true)
-      if request.content_type == "application/json" && %w[POST PUT].include?(request.request_method)
+      if request.content_type == 'application/json' && %w[POST PUT].include?(request.request_method)
         request.body.rewind
         body = JSON.parse(request.body.read.presence || '{}').with_indifferent_access
         @params = body.merge(params.presence || {})

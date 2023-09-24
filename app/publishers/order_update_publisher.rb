@@ -3,6 +3,7 @@
 class OrderUpdatePublisher
   include Import['broker_connection']
   attr_reader :data
+
   PORTAL_QUEUE = 'portal.order.update'
 
   def call(data)
@@ -37,6 +38,6 @@ class OrderUpdatePublisher
   end
 
   def initilize_queues
-    ch.queue(PORTAL_QUEUE, :auto_delete => true).bind(exchange, routing_key: 'order.update')
+    ch.queue(PORTAL_QUEUE, auto_delete: true).bind(exchange, routing_key: 'order.update')
   end
 end

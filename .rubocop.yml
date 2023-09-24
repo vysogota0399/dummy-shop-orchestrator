@@ -24,16 +24,6 @@ Metrics/MethodLength:
 Metrics/BlockLength:
   CountComments: false
   Max: 50
-  IgnoredMethods:
-    - context
-    - describe
-    - it
-    - shared_examples
-    - shared_examples_for
-    - namespace
-    - draw
-    - configure
-    - group
 
 Style/Documentation:
   Enabled: false

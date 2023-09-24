@@ -9,7 +9,7 @@ class BaseFilter
       .then { |scope| apply_find(scope) }
       .then { |scope| apply_filter(scope) }
       .then { |scope| apply_order(scope) }
-      .then { |scope| scope.all }
+      .then(&:all)
   end
 
   private

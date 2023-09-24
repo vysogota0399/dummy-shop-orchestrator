@@ -6,7 +6,7 @@ class OrderSerializer
   attributes :id, :state, :assembler_id, :courier_id, :cost_cops
   attribute :error, if: ->(order) { order.damaged? }
 
-  has_many :items, if: Proc.new { |order, params| params && params[:with_items] }
+  has_many :items, if: proc { |_order, params| params && params[:with_items] }
 
   attribute :client do |object|
     {
@@ -15,7 +15,7 @@ class OrderSerializer
       address: object.address,
       front_door: object.front_door,
       floor: object.floor,
-      intercom: object.intercom,
+      intercom: object.intercom
     }
   end
 end
