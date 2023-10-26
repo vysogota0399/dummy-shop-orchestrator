@@ -26,7 +26,7 @@ gem 'erb', '~> 4.0', '>= 4.0.2'
 gem 'pagy', '~> 5.10'
 gem 'activesupport', '~> 7.0', '>= 7.0.4.2'
 gem 'bunny', '~> 2.22'
-gem 'jsonapi-serializer', '~> 2.2'
+gem 'blueprinter', '~> 0.30.0'
 
 group :test do
   gem 'rspec', '~> 3.12'

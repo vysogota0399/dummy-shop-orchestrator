@@ -5,8 +5,10 @@ require 'sinatra/namespace'
 require 'sinatra/json'
 
 class Api < Sinatra::Application
+  class BadReqest < StandardError; end
+
   include Pagy::Backend
-  include Import['orders_filter', 'items_filter']
+  include Import['orders_filter', 'items_filter', 'order_contract']
 
   helpers Sinatra::CustomLogger
   helpers do
@@ -14,13 +16,13 @@ class Api < Sinatra::Application
       pagination_meta, scope = pagy(scope)
       {
         meta: pagination_meta.vars.slice(:count, :page, :items),
-        scope:
+        scope: scope
       }
     end
 
-    def render_json_collection(scope)
+    def render_json_collection(scope, blueprint_options = {})
       paginated = with_pagination(scope)
-      serialized_scope = with_serializer(paginated.delete(:scope))
+      serialized_scope = with_blueprint(paginated.delete(:scope), blueprint_options)
 
       json serialized_scope.merge(paginated)
     end
@@ -42,19 +44,19 @@ class Api < Sinatra::Application
       json response
     end
 
-    error 400 do
+    error BadReqest do
       error = env['sinatra.error'].message
-      response = { error: JSON.parse(error) }
-      json response
+      response = { errors: JSON.parse(error) }
+      [400, json(response)]
     end
 
     before do
-      Thread.current[:request_id] = SecureRandom.hex(16)
+      Thread.current[:request_id] = headers.fetch('HTTP_X-Request-Id', SecureRandom.hex(16))
       logger.info("Request #{request.request_method} #{request.path} from #{request.ip}", http: true)
-      if request.content_type == 'application/json' && %w[POST PUT].include?(request.request_method)
+      if %w[application/json application/x-www-form-urlencoded].include?(request.content_type) && %w[POST PUT DELETE].include?(request.request_method)
         request.body.rewind
         body = JSON.parse(request.body.read.presence || '{}').with_indifferent_access
-        @params = body.merge(params.presence || {})
+        @params = body.merge(params[:id].presence || {})
       end
       logger.info("Request params: #{params}", http: true)
     end
@@ -69,36 +71,50 @@ class Api < Sinatra::Application
 
     namespace '/items' do
       helpers do
-        def with_serializer(scope, opts = {})
-          ItemSerializer.new(scope, params: opts).serializable_hash
+        def with_blueprint(scope, opts = {})
+          ItemBlueprint.render_as_hash(scope, { root: :data }.merge(opts))
         end
       end
 
       post '/filter' do
         render_json_collection items_filter.call(params)
       end
+
+      get '/categories' do
+        json data: Item.select(:kind).distinct.pluck(:kind)
+      end
     end
 
     namespace '/orders' do
       helpers do
-        def with_serializer(scope, opts = {})
-          OrderSerializer.new(scope, params: opts).serializable_hash
+        def with_blueprint(scope, opts = {})
+          OrderBlueprint.render_as_hash(scope, { root: :data }.merge(opts))
         end
       end
       post do
-        processor = Processor.new(params.delete(:order))
-        processor.send_signal(:validate!)
-        processor.send_signal(:prepare, params)
-        json with_serializer(processor.order)
+        order_params = params.delete(:order)
+        contract = order_contract.call(order_params)
+        raise BadReqest.new(contract.errors.to_h.to_json) if contract.errors.present?
+
+        processor = Processor.new(order_params)
+        processor.send_signal(:init)
+        json with_blueprint(processor.order)
+      end
+
+      post '/filter' do
+        render_json_collection orders_filter.call(params), view: :extended
       end
 
       post '/validate' do
-        processor = Processor.new(params.delete(:order))
-        processor.send_signal(:validate!)
+        order_params = params.delete(:order)
+        result = order_contract.call(order_params)
+        return json(data: {}) if result.errors.blank?
+
+        raise BadReqest.new(result.errors.to_h.to_json)
       end
 
       get '/:id' do
-        json with_serializer(Processor.new(params[:id]).order, with_items: true)
+        json with_blueprint(Processor.new(params[:id]).order, view: :extended)
       end
     end
   end

@@ -5,45 +5,32 @@ class Order < ApplicationRecord
   
   attr_reader :order_update_publisher
 
-  validates_presence_of :customer_id, :customer_email, :address, :front_door, :floor, :intercom
-
   has_many :order_items
   has_many :items, through: :order_items
 
   state_machine do
-    event :prepare do
-      transition new: :waiting_for_the_assembly
+    event :init do
+      transition new: :waiting_for_payment
     end
-    before_transition new: :waiting_for_the_assembly do |order, _transition|
-      order.item_ids = order.signal_params[:item_ids]
+
+    event :payment_accepted do
+      transition waiting_for_payment: :waiting_for_the_assembly
     end
 
     event :start_assembly do
       transition waiting_for_the_assembly: :assembling
     end
-    after_transition new: :assembling do |order, _transition|
-
-    end
 
     event :finish_assembly do
       transition assembling: :waiting_for_the_courier
-    end
-    after_transition assembling: :waiting_for_the_courier do |order, _transition|
-      # TODO: OrderTransitions::FinishAssembly(order)
     end
 
     event :start_delivery do
       transition waiting_for_the_courier: :delivering
     end
-    after_transition waiting_for_the_courier: :delivering do |order, _transition|
-      # TODO: OrderTransitions::StartDelivery(order)
-    end
 
     event :finish_delivery do
       transition delivering: :delivered
-    end
-    after_transition delivering: :delivered do |order, _transition|
-      # TODO: OrderTransitions::FinishDelivery(order)
     end
   end
 end

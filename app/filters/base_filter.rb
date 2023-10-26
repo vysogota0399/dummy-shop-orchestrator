@@ -27,7 +27,19 @@ class BaseFilter
   def apply_filter(scope)
     return scope unless params.key?(:filter)
 
-    scope.where(params[:filter])
+    predicate = {}
+    negative_predicate = {}
+    params[:filter].each do |k, v|
+      case v
+      when Array
+        v.each do |v_element|
+          v_element.to_s.include?('not_') ? add(negative_predicate, k, v_element.gsub('not_', '')) : add(predicate, k, v_element)
+        end
+      else
+        v.to_s.include?('not_') ? add(negative_predicate, k, v.gsub('not_', '')) : add(predicate, k, v)
+      end
+    end
+    scope.where(predicate).where.not(negative_predicate)
   end
 
   def apply_order(scope)
@@ -35,5 +47,13 @@ class BaseFilter
 
     order_by = params[:order].map { |k,v| "#{k} #{v}" }.join(',')
     scope.order(order_by)
+  end
+
+  def add(target, key, value)
+    if target.key?(key)
+      target[key] << value
+    else
+      target[key] = [value]
+    end
   end
 end

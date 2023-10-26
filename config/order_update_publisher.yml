@@ -1,0 +1,4 @@
+exchange_name: order_update
+routing_keys:
+  - order.update.portal
+  - order.update

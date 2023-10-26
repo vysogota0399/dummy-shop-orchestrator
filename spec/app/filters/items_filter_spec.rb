@@ -41,6 +41,19 @@ RSpec.describe 'ItemsFilter' do
         expected_scope = Item.where(weight: 0..).order(created_at: :desc)
         expect(actual_scop.pluck(:id)).to eq(expected_scope.pluck(:id))
       end
+
+      context 'and filter contains negative predicate' do
+        it 'returns currect items' do
+          exclude_item = Item.last
+          actual_items = filter.call(
+            filter: {
+              id: "not_#{exclude_item.id}"
+            }
+          )
+
+          expect(actual_items.ids).not_to include(exclude_item.id)
+        end
+      end
     end
   end
 end

@@ -11,7 +11,7 @@ module Concerns
         after_initialize do |object|
           object.order_update_publisher = Orchestrator['order_update_publisher']
         end
-        
+
         state_machine initial: :new do
           around_transition do |order, transition, block|
             order.signal_params = (transition.args.first || {}).with_indifferent_access
@@ -21,7 +21,7 @@ module Concerns
           event :terminate do
             transition any => :damaged
           end
-          before_transition any => :damaged do |order, _transition| 
+          before_transition any => :damaged do |order, _transition|
             error = order.signal_params[:error]
             order.update(error: {
               message: error.message,
@@ -30,7 +30,13 @@ module Concerns
           end
 
           after_transition any => any do |order, _transition|
-            serialized_order = OrderSerializer.new(order).serializable_hash.to_json
+            serialized_order = OrderBlueprint.render(
+              order, 
+              {
+                root: :data,
+                view: :extended,
+              }
+            )
             order.order_update_publisher.call(serialized_order)
           end
         end

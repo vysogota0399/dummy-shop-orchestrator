@@ -1,43 +1,64 @@
 # frozen_string_literal: true
 
 class OrderUpdatePublisher
-  include Import['broker_connection']
-  attr_reader :data
+  include Dry::Configurable
 
-  PORTAL_QUEUE = 'portal.order.update'
+  attr_reader :broker_connection
+
+  setting :exchange_name, reader: true
+  setting :routing_keys, reader: true 
+
+  def initialize
+    @broker_connection = Orchestrator['broker_connection']
+    configure do |instance_config|
+      instance_config.exchange_name = Orchestrator.config.order_update_publisher_config['exchange_name']
+      instance_config.routing_keys = Orchestrator.config.order_update_publisher_config['routing_keys']
+    end
+  end
 
   def call(data)
-    @data = data
-    initilize_queues
-    exchange.publish(*message)
+    with_channel do |channel|
+      each_routing_key do |rk|
+        payload = message(data, rk)
+        exchange_for(channel).publish(*payload)
+      end
+    end
   end
 
   private
 
-  def message
-    now = Time.current
+  def message(data, routing_key)
     [
       data,
       {
-        routing_key: 'order.update',
         headers: {
-          time: now
+          time: current_time
         },
         content_type: 'application/json',
-        timestamp: now.to_i
+        timestamp: current_time.to_i,
+        message_id: Thread.current[:request_id],
+        routing_key: routing_key 
       }
     ]
   end
 
-  def ch
-    @ch ||= broker_connection.create_channel
+  def each_routing_key
+    routing_keys.each do |rk| 
+      yield rk
+    end
   end
 
-  def exchange
-    @exchange ||= Bunny::Exchange.new(ch, :direct, 'order.update')
+  def with_channel
+    ch = broker_connection.channel
+    yield ch
+    ch.close
   end
 
-  def initilize_queues
-    ch.queue(PORTAL_QUEUE, auto_delete: true).bind(exchange, routing_key: 'order.update')
+  def exchange_for(channel)
+    channel.topic(exchange_name)
+  end
+
+  def current_time
+    @current_time ||= Time.current
   end
 end

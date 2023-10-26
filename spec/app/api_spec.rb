@@ -5,30 +5,31 @@ RSpec.describe Api do
 
   API_PATH = '/api/v1'
 
-  describe "POST #{API_PATH}/orders" do
+  describe "POST #{API_PATH}" do
     let(:valid_order_params) do 
       {
         order: {
           customer_id: 1,
           customer_email: 'test@mail.ru',
           address: 'msk',
-          front_door: 1,
-          floor: 1,
-          intercom: 1
+          front_door: '1',
+          floor: '1',
+          intercom: '1',
+          item_ids: [],
         }
       }
     end
-    describe "POST #{API_PATH}" do
+    describe "/orders" do
       context 'when request data valid' do
         it 'returns a successful response' do
-          post("#{API_PATH}/orders", valid_order_params)
+          post("#{API_PATH}/orders", valid_order_params.to_json)
           expect(last_response.status).to eq(200)
         end
       end
 
       context 'when request data invalid' do
         before { post("#{API_PATH}/orders", { fiz: :baz }.to_json) }
-        it 'returns a successful response' do
+        it 'returns bad request' do
           expect(last_response.status).to eq(400)
         end
       end
@@ -84,7 +85,7 @@ RSpec.describe Api do
 
     describe "POST #{API_PATH}/validate" do
       it 'returns a successful response' do
-        post("#{API_PATH}/orders/validate", valid_order_params)
+        post("#{API_PATH}/orders/validate", valid_order_params.to_json)
         expect(last_response.status).to eq(200)
       end
     end
@@ -102,7 +103,7 @@ RSpec.describe Api do
           get("#{API_PATH}/orders/#{expected_order.id}")
           response = JSON.parse(last_response.body)
 
-          actual_id = response.dig('data', 'attributes', 'id')
+          actual_id = response.dig('data', 'id')
           expect(actual_id).to eq(expected_order.id)
         end
   
